@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Empresa {
+  id          String      @id @default(uuid())
+  nome        String
+  cnpj        String      @unique
+  razaoSocial String
+  endereco    String
+  telefone    String
+  email       String
+  municipio   String
+  estado      String
+  createdAt   DateTime    @default(now())
+  produtos    Produto[]
+  categorias  Categoria[]
+}
+
+model Categoria {
+  id        String    @id @default(uuid())
+  nome      String
+  descricao String?
+  empresaId String
+  empresa   Empresa   @relation(fields: [empresaId], references: [id])
+  produtos  Produto[]
+}
+
+model Produto {
+  id                String             @id @default(uuid())
+  nome              String
+  descricao         String?
+  precoBase         Float
+  categoriaId       String
+  empresaId         String
+  categoria         Categoria          @relation(fields: [categoriaId], references: [id])
+  empresa           Empresa            @relation(fields: [empresaId], references: [id])
+  gruposComplemento GrupoComplemento[]
+}
+
+model GrupoComplemento {
+  id           String        @id @default(uuid())
+  nome         String
+  minItens     Int           @default(0)
+  maxItens     Int           @default(1)
+  produtoId    String
+  produto      Produto       @relation(fields: [produtoId], references: [id], onDelete: Cascade)
+  complementos Complemento[]
+}
+
+model Complemento {
+  id                 String           @id @default(uuid())
+  nome               String
+  preco              Float            @default(0)
+  grupoComplementoId String
+  grupoComplemento   GrupoComplemento @relation(fields: [grupoComplementoId], references: [id])
+}
